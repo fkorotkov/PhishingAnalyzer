@@ -3,6 +3,7 @@ package com.korotkov.utils;
 import java.io.IOException;
 import java.io.Reader;
 import java.net.URI;
+import java.util.List;
 
 public class StringUtil {
     private StringUtil() {
@@ -53,5 +54,13 @@ public class StringUtil {
         } while (read >= 0);
 
         return out.toString();
+    }
+
+    public static String toString(List<String> signature) {
+        StringBuilder result = new StringBuilder();
+        for (String item : signature) {
+            result.append(item).append('\n');
+        }
+        return result.toString();
     }
 }

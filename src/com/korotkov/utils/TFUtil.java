@@ -1,9 +1,8 @@
 package com.korotkov.utils;
 
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class TFUtil {
     private static HashMap<String, Double> map = new HashMap<String, Double>();
@@ -62,5 +61,15 @@ public class TFUtil {
             return 0.0;
         }
         return value / normalizedTF;
+    }
+
+    public static List<String> findWordsInFile(Scanner scanner) {
+        final List<String> words = new ArrayList<String>();
+        final Pattern wordPattern = Pattern.compile("\\w+");
+        while (scanner.hasNext(wordPattern)) {
+            String word = scanner.next(wordPattern);
+            words.add(word.toLowerCase());
+        }
+        return words;
     }
 }

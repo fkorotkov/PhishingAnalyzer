@@ -1,80 +1,52 @@
 package com.korotkov.analyzer.methods;
 
-import com.korotkov.base.URICallInfo;
-import com.korotkov.services.GoogleService;
 import com.korotkov.utils.MathUtil;
 import com.korotkov.utils.StringUtil;
 import com.korotkov.utils.TFUtil;
-import org.jsoup.nodes.Document;
 
 import java.io.IOException;
 import java.util.*;
 
-class CantinaAnalyzeMethod extends AbstractAnalyzeMethod {
+public class CantinaAnalyzeMethod {
     private static final int N = 5;
+    private final List<String> words;
 
-    protected CantinaAnalyzeMethod(List<URICallInfo> uriCallInfos) {
-        super(uriCallInfos);
+    public CantinaAnalyzeMethod(List<String> words) {
+        this.words = words;
     }
 
-    @Override
-    public double getProbability() {
-        try {
-            return getProbabilityImpl();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return 0;
+    public List<String> getWords() {
+        return words;
     }
 
-    private double getProbabilityImpl() throws IOException {
-        URICallInfo uriCallInfo = getLastCall();
-        Map<String, Double> frequencyMap = buildTFMapFromHtmlContent(uriCallInfo.getDocument());
+    public List<String> getSignature() {
+        Map<String, Double> frequencyMap = buildTFMapFromWords();
 
         if (frequencyMap.size() == 0) {
-            //Zero content Means Phishing
-            return 1.0;
+            return Collections.emptyList();
         }
 
-        List<String> signature = getSignature(frequencyMap);
-
-        if (isSignatureStrange(signature)) {
-            return 1.0;
-        }
-
-        signature.add(0, getLastCall().getDomainName());
-
-        List<String> domains = GoogleService.getDomains(signature);
-
-        if (domains.size() == 0) {
-            //Zero results Means Phishing
-            return 1.0;
-        }
-        return domains.contains(getLastCall().getDomainName()) ? 0.0 : 1.0;
+        return getSignatureFromMap(frequencyMap);
     }
 
-    private Map<String, Double> buildTFMapFromHtmlContent(Document document) throws IOException {
+    private Map<String, Double> buildTFMapFromWords() {
         Map<String, Long> map = new HashMap<String, Long>();
 
-        StringTokenizer stringTokenizer = new StringTokenizer(document.text());
-        while (stringTokenizer.hasMoreTokens()) {
-            String token = stringTokenizer.nextToken();
-            token = token.toLowerCase();
-            token = StringUtil.removeBlankCharacters(token);
-            if (token.length() < 2) {
+        for (String word : getWords()) {
+            if (word.length() < 3) {
                 continue;
             }
-            Long value = map.get(token);
+            Long value = map.get(word);
             if (value == null) {
                 value = 0L;
             }
-            map.put(token, value + 1);
+            map.put(word, value + 1);
         }
 
         return TFUtil.convertToTF(map);
     }
 
-    private List<String> getSignature(Map<String, Double> frequencyMap) {
+    private List<String> getSignatureFromMap(Map<String, Double> frequencyMap) {
         final Map<String, Double> tfidfMap = new HashMap<String, Double>(frequencyMap.size());
 
         for (Map.Entry<String, Double> entry : frequencyMap.entrySet()) {
