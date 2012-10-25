@@ -44,8 +44,13 @@ public class Main {
         for (String signatureWord : signature) {
             if(strangeWords.contains(signatureWord)) {
                 System.out.println("Secrete document");
+                return;
             }
         }
         System.out.println("Regular document");
+        System.out.println("Signature:");
+        for (String signatureWord : signature) {
+            System.out.println(signatureWord);
+        }
     }
 }

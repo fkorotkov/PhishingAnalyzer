@@ -65,10 +65,11 @@ public class TFUtil {
 
     public static List<String> findWordsInFile(Scanner scanner) {
         final List<String> words = new ArrayList<String>();
-        final Pattern wordPattern = Pattern.compile("\\w+");
-        while (scanner.hasNext(wordPattern)) {
-            String word = scanner.next(wordPattern);
-            words.add(word.toLowerCase());
+        while (scanner.hasNext()) {
+            String word = scanner.next().toLowerCase();
+            if (word.matches("[a-zа-я]+")) {
+                words.add(word.toLowerCase());
+            }
         }
         return words;
     }
